@@ -1,0 +1,18 @@
+server:
+  name: pelith_assignment
+  port: 8888
+log:
+  level: debug
+connection:
+  postgreSQL:
+    host: localhost:5432
+    db: assignment
+    user: assignment
+    password: assignment
+    maxConn: 10
+    maxConnIdle: 2
+  redis:
+    host: localhost:6379
+    password:
+    writeTimeoutSec: 3s
+    readTimeoutSec: 3s

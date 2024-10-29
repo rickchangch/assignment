@@ -1,0 +1,27 @@
+version: "3.9"
+
+volumes:
+  pgsql_db_data:
+
+
+services:
+  postgres:
+    image: postgres:14.7
+    ports:
+      - "5432:5432"
+    environment:
+      LC_COLLATE: 'en_US.UTF-8'
+      POSTGRES_DB: assignment
+      POSTGRES_USER: assignment
+      POSTGRES_PASSWORD: assignment
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - pgsql_db_data:/var/lib/postgresql/data
+      - ../sql/init.sql:/docker-entrypoint-initdb.d/0.sql:ro
+      - ../sql/test_data.sql:/docker-entrypoint-initdb.d/1.sql:ro
+  redis-standalone:
+    image: bitnami/redis:6.2.14
+    ports:
+      - 6379:6379
+    environment:
+      ALLOW_EMPTY_PASSWORD: 'yes'

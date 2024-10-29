@@ -1,0 +1,61 @@
+run:
+  timeout: 5m
+  tests: false  # Include test files or not.
+  allow-parallel-runners: true
+  # skip-dirs: # Exclude directories
+  #   - generated/files
+
+output:
+  show-stats: true
+  sort-results: true
+  sort-order:
+    - linter
+    - severity
+    - file
+
+linters:
+  disable-all: true
+  enable:
+    - lll
+    - errcheck
+    - staticcheck
+    - stylecheck
+    - typecheck
+    - funlen
+    - misspell
+    - unused
+    - gofmt
+    - goconst
+    - gocritic
+    - gocyclo
+    - goimports
+    - goprintffuncname
+    - gosimple
+    - govet
+    - ineffassign
+    - nakedret
+    - bodyclose
+    - dogsled
+    - exportloopref
+    - unconvert
+    - unparam
+    - whitespace
+
+linters-settings:
+  lll:
+    line-length: 120 # Typically 80-120
+    tab-width: 4
+  funlen:
+    lines: 100 # Set -1 to disable check
+    statements: 50
+    ignore-comments: true
+  goconst:
+    min-occurrences: 5
+issues:
+  exclude-rules:
+    - linters:
+        - stylecheck
+      text: "ST1003:" # Exclude variable names check, ex: Json -> JSON
+    - linters:
+        - lll
+      source: "^// "

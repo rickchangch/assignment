@@ -1,0 +1,13 @@
+bin/
+build/
+script/
+generate/
+
+# IDE
+.vscode/
+
+# VCS
+.github/
+
+# Test
+coverage.out

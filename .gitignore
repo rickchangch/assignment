@@ -1,0 +1,9 @@
+bin/
+build/
+generate/
+
+# IDE
+.vscode/
+
+# Test
+coverage.out

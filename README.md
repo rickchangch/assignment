@@ -19,6 +19,8 @@ The start time of this campaign can be set by the database or a config file. Thi
 2. Get user points history for distrubuted tasks
 3. Get a leaderboard based on points of distributed tasks
 
+---
+
 ## Getting Started
 
 1. Prepare development environment

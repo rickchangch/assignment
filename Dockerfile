@@ -1,4 +1,4 @@
-FROM golang:1.23.2 as builder
+FROM golang:1.22.8 as builder
 WORKDIR /workspace
 RUN apt-get update && \
     apt-get install -y make curl && \

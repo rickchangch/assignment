@@ -88,6 +88,7 @@ func main() {
 	userCampaignCtrl := controller.NewUserCampaignController(userCampaignSrv, userSrv)
 	pointHistoryCtrl := controller.NewPointHistoryController(pointHistorySrv)
 	swapCtrl := controller.NewSwapController(swapSrv)
+	testCtrl := controller.NewTestController()
 
 	// Server
 	ginServer, engine := server.NewGinServer(config.Server.Port)
@@ -106,6 +107,7 @@ func main() {
 	route := route.NewRoute(
 		engine, middleware,
 		campaignCtrl, userCampaignCtrl, pointHistoryCtrl, swapCtrl,
+		testCtrl,
 	)
 	route.Index()
 

@@ -20,6 +20,7 @@ type route struct {
 	userCampaignCtrl *controller.UserCampaignController
 	pointHistoryCtrl *controller.PointHistoryController
 	swapCtrl         *controller.SwapController
+	testCtrl         *controller.TestController
 }
 
 func NewRoute(
@@ -29,6 +30,7 @@ func NewRoute(
 	userCampaignCtrl *controller.UserCampaignController,
 	pointHistoryCtrl *controller.PointHistoryController,
 	swapCtrl *controller.SwapController,
+	testCtrl *controller.TestController,
 ) Route {
 	return &route{
 		engine:           engine,
@@ -37,6 +39,7 @@ func NewRoute(
 		userCampaignCtrl: userCampaignCtrl,
 		pointHistoryCtrl: pointHistoryCtrl,
 		swapCtrl:         swapCtrl,
+		testCtrl:         testCtrl,
 	}
 }
 
@@ -62,6 +65,11 @@ func (r *route) Index() {
 		swap := root.Group("/")
 		{
 			swap.POST("/v1/swap", r.swapCtrl.Swap)
+		}
+
+		test := root.Group("/")
+		{
+			test.GET("/isolation", r.testCtrl.Isolation)
 		}
 	}
 }

@@ -7,7 +7,7 @@ export let options = {
 };
 
 export default function () {
-    let res = http.get('http://localhost:8888/isolation');
+    let res = http.get('http://localhost:8888/isolation?action=UPSERT&level=RR');
 
     check(res, {
         'status is 200': (r) => r.status === 200,

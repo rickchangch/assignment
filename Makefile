@@ -12,21 +12,21 @@ BUILD_DIR := $(CURDIR)/build
 build:
 	go build -o $(BUILD_DIR)/server $(CURDIR)/cmd/server.go
 
-.PHONY: lint
-lint:
-	golangci-lint run ./cmd/... ./internal/...
-
 .PHONY: test
 test:
 	go test -v -cover -coverpkg ./internal/... -coverprofile=coverage.out ./internal/...
+
+.PHONY: lint
+lint:
+	$(BIN_DIR)/golangci-lint run ./cmd/... ./internal/...
 
 .PHONY: mock
 GEN_MOCK_DIR := $(CURDIR)/generate/mock
 mock:
 	rm -rf $(GEN_MOCK_DIR)/**/*_mock.go
 
-	$(BIN_DIR)/mockgen -package mock -source ./internal/redis/redis.go -destination $(GEN_MOCK_DIR)/redis/redis_mock.go
-	$(BIN_DIR)/mockgen -package mock -source ./internal/repo/campaign.go -destination $(GEN_MOCK_DIR)/repo/campaign_mock.go
-	$(BIN_DIR)/mockgen -package mock -source ./internal/repo/point_history.go -destination $(GEN_MOCK_DIR)/repo/point_history_mock.go
-	$(BIN_DIR)/mockgen -package mock -source ./internal/repo/user_campaign.go -destination $(GEN_MOCK_DIR)/repo/user_campaign_mock.go
-	$(BIN_DIR)/mockgen -package mock -source ./internal/repo/user.go -destination $(GEN_MOCK_DIR)/repo/user_mock.go
+	$(BIN_DIR)/mockgen -package mock -destination $(GEN_MOCK_DIR)/redis/redis_mock.go github.com/go-redis/redis/v8 Cmdable
+	$(BIN_DIR)/mockgen -package mock -destination $(GEN_MOCK_DIR)/repo/campaign_mock.go -source ./internal/repo/campaign.go
+	$(BIN_DIR)/mockgen -package mock -destination $(GEN_MOCK_DIR)/repo/point_history_mock.go -source ./internal/repo/point_history.go
+	$(BIN_DIR)/mockgen -package mock -destination $(GEN_MOCK_DIR)/repo/user_campaign_mock.go -source ./internal/repo/user_campaign.go
+	$(BIN_DIR)/mockgen -package mock -destination $(GEN_MOCK_DIR)/repo/user_mock.go -source ./internal/repo/user.go

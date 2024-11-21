@@ -4,9 +4,11 @@ import (
 	"assignment-pe/internal/cx"
 	"assignment-pe/internal/errs"
 	"assignment-pe/internal/log"
+	"assignment-pe/internal/rest/middleware/ratelimiter"
 	"errors"
 	"net/http"
 	"runtime/debug"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -22,20 +24,24 @@ type Middleware interface {
 	PanicRecovery() gin.HandlerFunc
 	Auth() gin.HandlerFunc
 	Tx() gin.HandlerFunc
+	RateLimit() gin.HandlerFunc
 }
 
 type middleware struct {
-	logger log.AppLogger
-	pgdb   *sqlx.DB
+	logger      log.AppLogger
+	pgdb        *sqlx.DB
+	ratelimiter ratelimiter.Ratelimiter
 }
 
 func NewMiddleware(
 	logger log.AppLogger,
 	pgdb *sqlx.DB,
+	ratelimiter ratelimiter.Ratelimiter,
 ) Middleware {
 	return &middleware{
-		logger: logger,
-		pgdb:   pgdb,
+		logger:      logger,
+		pgdb:        pgdb,
+		ratelimiter: ratelimiter,
 	}
 }
 
@@ -164,9 +170,37 @@ func (m *middleware) Tx() gin.HandlerFunc {
 	}
 }
 
-// TODO
+// TODO: Implement JWT
 func (m *middleware) Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		userID := c.Query("userID")
+		ctx := cx.SetUserID(c.Request.Context(), userID)
+		c.Request = c.Request.WithContext(ctx)
+
+		c.Next()
+	}
+}
+
+func (m *middleware) RateLimit() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		userID := cx.GetUserID(ctx)
+		logger := cx.GetLogger(ctx)
+
+		allow, retryAfter, err := m.ratelimiter.AllowByTokenBucket(ctx, userID, 1)
+		if err != nil {
+			_ = c.Error(errs.ErrInternal.Rewrap(err))
+			c.Abort()
+		}
+
+		logger.Debug(userID, allow, retryAfter)
+
+		if !allow {
+			_ = c.Error(errs.ErrTooManyRequests.New())
+			c.Header("Retry-After", strconv.Itoa(retryAfter))
+			c.Abort()
+		}
+
 		c.Next()
 	}
 }

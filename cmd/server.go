@@ -2,12 +2,14 @@ package main
 
 import (
 	"assignment-pe/internal/config"
+	"assignment-pe/internal/daemon/sse"
 	"assignment-pe/internal/log"
 	"assignment-pe/internal/postgre"
 	"assignment-pe/internal/redis"
 	"assignment-pe/internal/repo"
 	"assignment-pe/internal/rest/controller"
 	"assignment-pe/internal/rest/middleware"
+	"assignment-pe/internal/rest/middleware/ratelimiter"
 	"assignment-pe/internal/rest/route"
 	"assignment-pe/internal/rest/server"
 	"assignment-pe/internal/service"
@@ -56,8 +58,8 @@ func main() {
 	redis, err := redis.NewRedis(redis.RedisConfig{
 		Addr:         config.Connection.Redis.Host,
 		Password:     config.Connection.Redis.Password,
-		WriteTimeout: config.Connection.Redis.WriteTimeoutSec,
-		ReadTimeout:  config.Connection.Redis.ReadTimeoutSec,
+		WriteTimeout: config.Connection.Redis.WriteTimeout,
+		ReadTimeout:  config.Connection.Redis.ReadTimeout,
 	})
 	if err != nil {
 		panic("init redis failed: " + err.Error())
@@ -69,6 +71,14 @@ func main() {
 			logger.Info("redis closed")
 		}
 	}()
+
+	sseSender := sse.NewEventSource(
+		config.EventSource.Timeout,
+		config.EventSource.IdleTimeout,
+		config.EventSource.CloseOnTimeout,
+	)
+	defer sseSender.Close()
+	sseSender.Run()
 
 	// Repo
 	campaignRepo := repo.NewCampaignRepo()
@@ -103,9 +113,12 @@ func main() {
 		}
 	}()
 
-	middleware := middleware.NewMiddleware(logger, pgdb)
+	rl := ratelimiter.NewRedisRateLimiter(redis, 10, 1*time.Minute)
+
+	middleware := middleware.NewMiddleware(logger, pgdb, rl)
+
 	route := route.NewRoute(
-		engine, middleware,
+		engine, middleware, sseSender,
 		campaignCtrl, userCampaignCtrl, pointHistoryCtrl, swapCtrl,
 		testCtrl,
 	)

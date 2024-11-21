@@ -14,5 +14,9 @@ connection:
   redis:
     host: localhost:6379
     password:
-    writeTimeoutSec: 3s
-    readTimeoutSec: 3s
+    writeTimeout: 3s
+    readTimeout: 3s
+eventSource:
+  timeout: 1s
+  closeOnTimeout: false
+  idleTimeout: 3m

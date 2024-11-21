@@ -1,6 +1,7 @@
 package route
 
 import (
+	"assignment-pe/internal/daemon/sse"
 	"assignment-pe/internal/errs"
 	"assignment-pe/internal/rest/controller"
 	"assignment-pe/internal/rest/middleware"
@@ -16,6 +17,7 @@ type Route interface {
 type route struct {
 	engine           *gin.Engine
 	mw               middleware.Middleware
+	sseSender        *sse.SSESender
 	campaignCtrl     *controller.CampaignController
 	userCampaignCtrl *controller.UserCampaignController
 	pointHistoryCtrl *controller.PointHistoryController
@@ -26,6 +28,7 @@ type route struct {
 func NewRoute(
 	engine *gin.Engine,
 	mw middleware.Middleware,
+	sseSender *sse.SSESender,
 	campaignCtrl *controller.CampaignController,
 	userCampaignCtrl *controller.UserCampaignController,
 	pointHistoryCtrl *controller.PointHistoryController,
@@ -35,6 +38,7 @@ func NewRoute(
 	return &route{
 		engine:           engine,
 		mw:               mw,
+		sseSender:        sseSender,
 		campaignCtrl:     campaignCtrl,
 		userCampaignCtrl: userCampaignCtrl,
 		pointHistoryCtrl: pointHistoryCtrl,
@@ -70,6 +74,7 @@ func (r *route) Index() {
 		test := root.Group("/")
 		{
 			test.GET("/isolation", r.testCtrl.Isolation)
+			test.GET("/sse", gin.WrapH(r.sseSender.GetES()))
 		}
 	}
 }

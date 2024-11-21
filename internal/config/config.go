@@ -27,11 +27,16 @@ type Config struct {
 			UsePgBouncer bool
 		}
 		Redis struct {
-			Host            string
-			Password        string
-			WriteTimeoutSec time.Duration
-			ReadTimeoutSec  time.Duration
+			Host         string
+			Password     string
+			WriteTimeout time.Duration
+			ReadTimeout  time.Duration
 		}
+	}
+	EventSource struct {
+		Timeout        time.Duration
+		IdleTimeout    time.Duration
+		CloseOnTimeout bool
 	}
 }
 
